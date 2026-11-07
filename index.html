@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123b35">
+  <meta name="description" content="CASHMATE - Gestion simple de boutique hors ligne">
+  <title>CASHMATE</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">C</span><div><strong>CASHMATE</strong><small>Gestion de boutique</small></div></div>
+    <span id="connection" class="status">Hors ligne prêt</span>
+  </header>
+
+  <main class="container">
+    <section id="view-dashboard" class="view active">
+      <div class="welcome"><div><p class="eyebrow">TABLEAU DE BORD</p><h1>Bonjour 👋</h1><p class="muted">Voici le résumé de votre boutique.</p></div><div class="date-pill" id="today"></div></div>
+      <div class="stats">
+        <article class="stat primary"><span>Ventes du jour</span><strong id="dash-sales">0 F</strong><small>Montant encaissé + crédits</small></article>
+        <article class="stat"><span>Bénéfice estimé</span><strong id="dash-profit">0 F</strong><small>Après coût des articles et dépenses</small></article>
+        <article class="stat"><span>Dépenses du jour</span><strong id="dash-expenses">0 F</strong><small>Charges enregistrées</small></article>
+        <article class="stat"><span>Valeur du stock</span><strong id="dash-stock">0 F</strong><small>Au prix d'achat</small></article>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">APERÇU</p><h2>Actions rapides</h2></div></div>
+        <div class="quick-actions">
+          <button class="quick" data-go="sales"><span>＋</span><b>Nouvelle vente</b><small>Enregistrer une vente</small></button>
+          <button class="quick" data-go="products"><span>▦</span><b>Ajouter un produit</b><small>Mettre à jour le stock</small></button>
+          <button class="quick" data-go="expenses"><span>−</span><b>Ajouter une dépense</b><small>Suivre les sorties</small></button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">SURVEILLANCE</p><h2>Stock faible</h2></div><button class="text-btn" data-go="products">Voir les produits</button></div>
+        <div id="low-stock" class="empty">Aucun produit en stock faible.</div>
+      </div>
+      <p class="footnote">Les données sont enregistrées sur cet appareil. Faites régulièrement une sauvegarde.</p>
+    </section>
+
+    <section id="view-products" class="view">
+      <div class="page-heading"><div><p class="eyebrow">INVENTAIRE</p><h1>Produits</h1><p class="muted">Gérez les articles et les quantités.</p></div><button class="btn" id="add-product">＋ Ajouter</button></div>
+      <div class="toolbar"><input id="product-search" placeholder="Rechercher un produit…" aria-label="Rechercher un produit"></div>
+      <div id="products-list" class="list"></div>
+      <form id="product-form" class="panel form-panel hidden">
+        <div class="panel-heading"><h2 id="product-form-title">Nouveau produit</h2><button type="button" class="icon-btn" data-close="product-form">✕</button></div>
+        <input type="hidden" id="product-id">
+        <label>Nom du produit<input id="product-name" required maxlength="80" placeholder="Ex. Savon"></label>
+        <div class="two"><label>Prix d'achat (FCFA)<input id="product-cost" required type="number" min="0" step="1"></label><label>Prix de vente (FCFA)<input id="product-price" required type="number" min="0" step="1"></label></div>
+        <div class="two"><label>Quantité en stock<input id="product-qty" required type="number" min="0" step="1"></label><label>Seuil d'alerte<input id="product-alert" type="number" min="0" step="1" value="3"></label></div>
+        <button class="btn full" type="submit">Enregistrer le produit</button>
+      </form>
+    </section>
+
+    <section id="view-sales" class="view">
+      <div class="page-heading"><div><p class="eyebrow">ENCAISSEMENT</p><h1>Nouvelle vente</h1><p class="muted">La quantité sera déduite du stock.</p></div></div>
+      <form id="sale-form" class="panel">
+        <label>Produit<select id="sale-product" required><option value="">Choisir un produit</option></select></label>
+        <div class="two"><label>Quantité<input id="sale-qty" type="number" min="1" step="1" value="1" required></label><label>Prix unitaire (FCFA)<input id="sale-price" type="number" min="0" step="1" required></label></div>
+        <div class="sale-total"><span>Total de la vente</span><strong id="sale-total">0 F</strong></div>
+        <label>Mode de paiement<select id="sale-method"><option>Espèces</option><option>Wave</option><option>Orange Money</option><option>Crédit client</option></select></label>
+        <label id="sale-customer-wrap" class="hidden">Nom du client<input id="sale-customer" maxlength="80" placeholder="Nom du client"></label>
+        <button class="btn full" type="submit">Valider la vente</button>
+      </form>
+      <div class="panel"><div class="panel-heading"><h2>Ventes récentes</h2></div><div id="sales-list" class="list compact"></div></div>
+    </section>
+
+    <section id="view-expenses" class="view">
+      <div class="page-heading"><div><p class="eyebrow">SORTIES D'ARGENT</p><h1>Dépenses</h1><p class="muted">Enregistrez les charges de la boutique.</p></div></div>
+      <form id="expense-form" class="panel">
+        <label>Motif de la dépense<input id="expense-label" required maxlength="100" placeholder="Ex. Transport, électricité…"></label>
+        <label>Montant (FCFA)<input id="expense-amount" required type="number" min="1" step="1"></label>
+        <button class="btn full" type="submit">Enregistrer la dépense</button>
+      </form>
+      <div class="panel"><div class="panel-heading"><h2>Historique</h2></div><div id="expenses-list" class="list compact"></div></div>
+    </section>
+
+    <section id="view-customers" class="view">
+      <div class="page-heading"><div><p class="eyebrow">VENTES À CRÉDIT</p><h1>Crédits clients</h1><p class="muted">Suivez les montants qui restent à recevoir.</p></div></div>
+      <div class="panel"><div class="panel-heading"><h2>Dettes en cours</h2><strong id="debt-total">0 F</strong></div><div id="credits-list" class="list compact"></div></div>
+    </section>
+
+    <section id="view-reports" class="view">
+      <div class="page-heading"><div><p class="eyebrow">ACTIVITÉ</p><h1>Rapports</h1><p class="muted">Résumé depuis le début de l'utilisation.</p></div></div>
+      <div class="stats">
+        <article class="stat"><span>Ventes totales</span><strong id="report-sales">0 F</strong></article>
+        <article class="stat"><span>Coût des articles vendus</span><strong id="report-cost">0 F</strong></article>
+        <article class="stat"><span>Dépenses totales</span><strong id="report-expenses">0 F</strong></article>
+        <article class="stat primary"><span>Bénéfice estimé</span><strong id="report-profit">0 F</strong></article>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><h2>Sauvegarde des données</h2></div>
+        <p class="muted">Exportez une copie JSON de vos données pour les conserver ou les transférer.</p>
+        <button class="btn full" id="export-data">Télécharger ma sauvegarde</button>
+        <label class="file-label">Restaurer une sauvegarde JSON<input type="file" id="import-data" accept="application/json"></label>
+        <p class="footnote">La restauration remplace les données présentes sur cet appareil.</p>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view">
+      <div class="page-heading"><div><p class="eyebrow">PRÉFÉRENCES</p><h1>Paramètres</h1><p class="muted">Personnalisez votre espace.</p></div></div>
+      <form id="settings-form" class="panel">
+        <label>Nom de la boutique<input id="shop-name" maxlength="80" placeholder="Ma boutique"></label>
+        <button class="btn full" type="submit">Enregistrer</button>
+      </form>
+      <div class="panel"><h2>À propos de CASHMATE</h2><p class="muted">Version MVP 1.0 — gestion locale de boutique, en français et utilisable hors connexion après le premier chargement.</p></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navigation principale">
+    <button class="nav-item active" data-view="dashboard"><span>⌂</span><small>Accueil</small></button>
+    <button class="nav-item" data-view="products"><span>▦</span><small>Produits</small></button>
+    <button class="nav-item" data-view="sales"><span>＋</span><small>Ventes</small></button>
+    <button class="nav-item" data-view="expenses"><span>↘</span><small>Dépenses</small></button>
+    <button class="nav-item" data-view="reports"><span>▤</span><small>Rapports</small></button>
+  </nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
