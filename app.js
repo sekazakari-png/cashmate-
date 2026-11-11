@@ -23,7 +23,73 @@ window.addEventListener('offline',()=>{$('connection').textContent='Hors ligne �
 
 function productForm(p=null){$('product-form').classList.remove('hidden');$('product-form-title').textContent=p?'Modifier le produit':'Nouveau produit';$('product-id').value=p?.id||'';$('product-name').value=p?.name||'';$('product-cost').value=p?.cost??'';$('product-price').value=p?.price??'';$('product-qty').value=p?.qty??0;$('product-alert').value=p?.alert??3;$('product-form').scrollIntoView({behavior:'smooth',block:'start'})}
 $('add-product').addEventListener('click',()=>productForm());
-$('product-form').addEventListener('submit',async e=>{e.preventDefault();const id=$('product-id').value||uid();const p={id,name:$('product-name').value.trim(),cost:+$('product-cost').value,price:+$('product-price').value,qty:+$('product-qty').value,alert:+$('product-alert').value||0,updatedAt:stamp()};if(!p.name||p.cost<0||p.price<0||p.qty<0)return notify('Vérifiez les valeurs saisies.');await put('products',p);e.target.reset();$('product-form').classList.add('hidden');await renderProducts();await renderDashboard();notify('Produit enregistré.')});
+
+
+$('product-form').addEventListener('submit', async e => {
+
+  e.preventDefault();
+
+  const id = $('product-id').value || uid();
+
+  const ancien = (await all('products')).find(x => x.id === id);
+
+  const fichier = $('product-image').files[0];
+
+  let image = ancien?.image || '';
+
+  if (fichier) {
+
+    image = await new Promise((resolve, reject) => {
+
+      const lecteur = new FileReader();
+
+      lecteur.onload = () => resolve(lecteur.result);
+
+      lecteur.onerror = () => reject(lecteur.error);
+
+      lecteur.readAsDataURL(fichier);
+
+    });
+
+  }
+
+  const p = {
+
+    id,
+
+    name: $('product-name').value.trim(),
+
+    cost: +$('product-cost').value,
+
+    price: +$('product-price').value,
+
+    qty: +$('product-qty').value,
+
+    alert: +$('product-alert').value || 0,
+
+    image,
+
+    updatedAt: stamp()
+
+  };
+
+  if (!p.name || p.cost < 0 || p.price < 0 || p.qty < 0)
+
+    return notify('Vérifiez les valeurs saisies.');
+
+  await put('products', p);
+
+  e.target.reset();
+
+  $('product-form').classList.add('hidden');
+
+  await renderProducts();
+
+  await renderDashboard();
+
+  notify('Produit enregistré.');
+
+});
 async function renderProducts(){const q=$('product-search').value.toLowerCase();const ps=(await all('products')).filter(p=>p.name.toLowerCase().includes(q));$('products-list').innerHTML=ps.length?ps.map(p=>`<div class="list-row"><div><b>${esc(p.name)}</b><small>Achat ${money(p.cost)} · Vente ${money(p.price)} · Stock ${p.qty}</small><div class="row-actions"><button class="mini-btn" data-edit="${p.id}">Modifier</button><button class="mini-btn danger" data-delete="${p.id}">Supprimer</button></div></div><strong>${money(p.price)}</strong></div>`).join(''):'<div class="empty">Aucun produit. Ajoutez votre premier article.</div>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=async()=>productForm((await all('products')).find(p=>p.id===b.dataset.edit)));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{if(confirm('Supprimer ce produit ? Les ventes déjà enregistrées seront conservées.')){await remove('products',b.dataset.delete);renderProducts();renderDashboard()}})}
 $('product-search').addEventListener('input',renderProducts);
 
