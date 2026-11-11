@@ -48,6 +48,10 @@
         <div class="panel-heading"><h2 id="product-form-title">Nouveau produit</h2><button type="button" class="icon-btn" data-close="product-form">✕</button></div>
         <input type="hidden" id="product-id">
         <label>Nom du produit<input id="product-name" type="text" required maxlength="80" placeholder="Ex. Savon"></label>
+        <label>Photo du produit
+<label></
+<input id="product-image" type="file" accept="image/*">
+<label></label>
         <div class="two"><label>Prix d'achat (FCFA)<input id="product-cost" required type="number" min="0" step="1"></label><label>Prix de vente (FCFA)<input id="product-price" required type="number" min="0" step="1"></label></div>
         <div class="two"><label>Quantité en stock<input id="product-qty" required type="number" min="0" step="1"></label><label>Seuil d'alerte<input id="product-alert" type="number" min="0" step="1" value="3"></label></div>
         <button class="btn full" type="submit">Enregistrer le produit</button>
